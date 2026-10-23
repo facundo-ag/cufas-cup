@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CUFA'S CUP II - Transmisión oficial del torneo de FIFA, 20 equipos, fixture completo en vivo y tabla de posiciones.">
+  <title>CUFA'S CUP II | Torneo Oficial de FIFA</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Teko:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/main.css?v=cufas_v12">
+  <link rel="stylesheet" href="css/components.css?v=cufas_v12">
+  <link rel="stylesheet" href="css/animations.css?v=cufas_v12">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+  <!-- Sliding Left Drawer Menu (Menú de 3 rayas del lado izquierdo) -->
+  <div id="portal-drawer-backdrop" class="drawer-backdrop"></div>
+  <aside id="portal-drawer" class="portal-drawer" aria-hidden="true">
+    <div class="drawer-header">
+      <div class="drawer-brand">
+        <img src="fotos/bannertorneo.png.png" class="brand-cup-logo" alt="Cufa's Cup" />
+        <div>
+          <h3>CUFA'S CUP</h3>
+          <span>PORTAL MULTIEDICIÓN</span>
+        </div>
+      </div>
+      <button id="btn-close-drawer" class="drawer-close-btn" aria-label="Cerrar menú">✕</button>
+    </div>
+
+    <div class="drawer-section-label">SELECCIONAR EDICIÓN / DESTINO</div>
+
+    <nav class="drawer-nav" id="drawer-portal-nav">
+      <button class="drawer-nav-item active" data-portal="hub" id="drawer-btn-hub">
+        <div class="drawer-nav-icon">🏠</div>
+        <div class="drawer-nav-text">
+          <div class="drawer-nav-title">Menú Principal (Hub)</div>
+          <div class="drawer-nav-desc">Portada y selector de torneos</div>
+        </div>
+      </button>
+
+      <button class="drawer-nav-item" data-portal="edition-2025" id="drawer-btn-edition2025">
+        <div class="drawer-nav-thumb">
+          <img src="fotos/Cufas cup 1.jpg" alt="Cufa's Cup 1" />
+        </div>
+        <div class="drawer-nav-text">
+          <div class="drawer-nav-title">Edición 2025 (Cufa's Cup I)</div>
+          <div class="drawer-nav-desc">Archivo oficial • 16 Equipos • Campeón Chino</div>
+        </div>
+        <span class="drawer-item-badge badge-past">1° EDICIÓN</span>
+      </button>
+
+      <button class="drawer-nav-item" data-portal="edition-2026" id="drawer-btn-edition2026">
+        <div class="drawer-nav-thumb">
+          <img src="fotos/Cufas cup 2.jpg" alt="Cufa's Cup 2" />
+        </div>
+        <div class="drawer-nav-text">
+          <div class="drawer-nav-title">Edición Actual (Cufa's Cup II)</div>
+          <div class="drawer-nav-desc">Torneo en vivo • 20 Equipos • Tabla & Fixture</div>
+        </div>
+        <span class="drawer-item-badge badge-live">EN VIVO 🔴</span>
+      </button>
+
+      <button class="drawer-nav-item" data-portal="ranking" id="drawer-btn-ranking">
+        <div class="drawer-nav-icon">🌟</div>
+        <div class="drawer-nav-text">
+          <div class="drawer-nav-title">Ranking FIFA / Histórico</div>
+          <div class="drawer-nav-desc">Tabla acumulada all-time y podio histórico</div>
+        </div>
+        <span class="drawer-item-badge badge-gold">ALL-TIME</span>
+      </button>
+
+      <button class="drawer-nav-item" data-portal="edition-2027" id="drawer-btn-edition2027">
+        <div class="drawer-nav-thumb" style="position: relative; overflow: hidden; border-color: rgba(245, 197, 24, 0.4);">
+          <img src="fotos/Cufas cup 3.jpg" alt="???" style="filter: blur(4px) brightness(0.65);" />
+        </div>
+        <div class="drawer-nav-text">
+          <div class="drawer-nav-title" style="color: #cbd5e1;">???</div>
+          <div class="drawer-nav-desc">??? • Próximamente en preparación</div>
+        </div>
+        <span class="drawer-item-badge" style="background: rgba(245, 197, 24, 0.15); color: #f5c518; border: 1px solid rgba(245, 197, 24, 0.4);">⏳ PRÓXIMAMENTE</span>
+      </button>
+    </nav>
+
+    <div class="drawer-footer">
+      <div class="drawer-footer-card">
+        <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 0.35rem;">
+          Estado de Servidor
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <span style="font-size: 0.8rem; color: #fff; font-weight: 700;">Base de Datos:</span>
+          <span id="drawer-db-status" style="font-size: 0.8rem; color: #00e676; font-weight: 800;">● Cloud (Firebase)</span>
+        </div>
+      </div>
+      <div style="text-align: center; font-size: 0.68rem; color: var(--text-muted); margin-top: 1rem;">
+        CUFA'S CUP • Transmisión Oficial
+      </div>
+    </div>
+  </aside>
+
+  <!-- Top TV Broadcast Header -->
+  <header class="main-header">
+    <div class="container header-inner">
+      
+      <!-- Left: 3-line Hamburger Menu Button + Brand Logo -->
+      <div class="header-left">
+        <button id="btn-portal-drawer-toggle" class="hamburger-btn" aria-label="Abrir Menú de Navegación" title="Menú del Portal">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+
+        <div class="brand-wrapper" id="brand-home-link" style="cursor: pointer;" title="Ir al Menú Principal">
+          <img src="fotos/bannertorneo.png.png" class="brand-cup-logo" alt="Cufa's Cup" />
+          <div class="brand-text">
+            <h1>CUFA'S CUP</h1>
+            <span id="header-portal-label">PORTAL MULTIEDICIÓN</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center: Contextual Sub-Navigation (Always Visible at the Top) -->
+      <nav class="header-context-nav" id="header-context-nav">
+        <!-- 1. Tabs for Edición Actual (2026) -->
+        <div class="nav-tabs header-subtabs" id="header-tabs-2026" style="display: none;">
+          <button class="nav-btn active" data-tab="standings" id="top-btn-standings">
+            📊 EQUIPOS & TABLA
+          </button>
+          <button class="nav-btn" data-tab="fixtures" id="top-btn-fixtures">
+            ⚽ FIXTURE
+          </button>
+          <button class="nav-btn" data-tab="bracket" id="top-btn-bracket">
+            ⚔️ ELIMINATORIAS
+          </button>
+          <button class="nav-btn admin-nav" data-tab="admin" id="top-btn-admin">
+            🔒 ADMIN
+          </button>
+        </div>
+
+        <!-- 2. Tabs for Edición 2025 -->
+        <div class="nav-tabs header-subtabs" id="header-tabs-2025" style="display: none;">
+          <button class="nav-btn active" data-subtab-25="playoffs" id="top-btn-25-playoffs">
+            ⚔️ ELIMINATORIAS
+          </button>
+          <button class="nav-btn" data-subtab-25="groups" id="top-btn-25-groups">
+            📊 FASE DE GRUPOS
+          </button>
+          <button class="nav-btn" data-subtab-25="podium" id="top-btn-25-podium">
+            🎖️ CUADRO DE HONOR
+          </button>
+        </div>
+
+        <!-- 3. Title / Badge for Ranking FIFA -->
+        <div class="header-badge-title" id="header-title-ranking" style="display: none;">
+          <span class="ranking-header-badge">🌟 RANKING FIFA • SALÓN HISTÓRICO</span>
+        </div>
+
+        <!-- 4. Indicator for Hub -->
+        <div class="header-badge-title" id="header-title-hub">
+          <span class="hub-header-badge">🏠 MENÚ PRINCIPAL • PORTAL MULTIEDICIÓN</span>
+        </div>
+      </nav>
+
+      <!-- Right: Broadcast Status -->
+      <div class="header-right">
+        <div class="broadcast-live-badge">
+          <span class="live-dot"></span> EN VIVO
+        </div>
+        <div class="sync-status" id="sync-status-box">
+          <span id="sync-text">Local</span>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container" style="padding-top: 1.25rem;">
+    
+    <!-- Views Container -->
+    <div id="views-container">
+      
+      <!-- 1. HUB VIEW (PORTAL PRINCIPAL) -->
+      <section id="view-hub" class="view-section active"></section>
+
+      <!-- 2. EDICIÓN 2025 VIEW (ARCHIVO HISTÓRICO) -->
+      <section id="view-edition-2025" class="view-section"></section>
+
+      <!-- 3. EDICIÓN 2026 VIEW (EDICIÓN ACTUAL EN VIVO) -->
+      <section id="view-edition-2026" class="view-section">
+        
+        <!-- Edition 2026 Header Hero with Official Photo (fotos/Cufas cup 2.jpg) -->
+        <div class="edition-hero-card edition-hero-card-live">
+          <div class="edition-hero-inner">
+            <div class="edition-hero-media">
+              <img src="fotos/Cufas cup 2.jpg" alt="Cufa's Cup 2 Oficial" class="edition-official-poster" />
+            </div>
+            <div class="edition-hero-details">
+              <div class="edition-meta-top">
+                <span class="hub-badge hub-badge-live">
+                  <span class="live-dot-pulse"></span> TORNEO EN VIVO • CLOUD RTDB
+                </span>
+                <span class="pill-stat live-tag">TEMPORADA 2025 / 2026</span>
+              </div>
+              <h2 class="edition-title" style="color: #ffffff;">CUFA'S CUP II • EDICIÓN ACTUAL</h2>
+              <p class="edition-subtitle" style="margin: 0.4rem 0 0.65rem;">
+                Fase de Liga estilo Champions League • 20 Clubes y Selecciones • Cuartos, Semis y Gran Final
+              </p>
+              <div class="edition-pills-row">
+                <span class="pill-stat">🏟️ 20 Equipos</span>
+                <span class="pill-stat">📅 40 Partidos (4 Fechas)</span>
+                <span class="pill-stat cyan-border">⚡ 1° al 4°: Cuartos Directo</span>
+                <span class="pill-stat blue-border">⚔️ 5° al 12°: Playoffs Clasificatorios</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Player Search Filter (For 2026) -->
+        <div class="player-quick-search" id="search-container-2026">
+          <span class="search-icon-pos">🔍</span>
+          <input 
+            type="text" 
+            id="global-search-player" 
+            class="quick-search-input" 
+            placeholder="Buscar jugador o equipo en la edición actual (ej. Facu, Diego, Pehuen, Real Madrid...)"
+            autocomplete="off"
+          />
+        </div>
+
+        <!-- 2026 Sub-views -->
+        <div id="subviews-2026">
+          <div id="view-standings" class="edition-subview active"></div>
+          <div id="view-fixtures" class="edition-subview" style="display: none;"></div>
+          <div id="view-bracket" class="edition-subview" style="display: none;"></div>
+          <div id="view-admin" class="edition-subview" style="display: none;"></div>
+          <div id="view-participant" class="edition-subview" style="display: none;"></div>
+        </div>
+
+      </section>
+
+      <!-- 4. HISTORICAL RANKING VIEW -->
+      <section id="view-ranking" class="view-section"></section>
+
+    </div>
+
+  </main>
+
+  <!-- Firebase Setup Modal -->
+  <div class="modal-overlay" id="firebase-modal">
+    <div class="modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #1e2a42; padding-bottom: 0.5rem;">
+        <div style="font-weight: 900; font-size: 1.1rem; color: #fff;">🔥 CONECTAR CON FIREBASE</div>
+        <button id="btn-close-firebase-modal" class="btn-tv btn-tv-secondary" style="padding: 0.2rem 0.6rem;">✕</button>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">
+        Pegá tus credenciales de Firebase Firestore para actualizar en vivo:
+      </p>
+      
+      <div class="form-group">
+        <label class="form-label" style="color: #f5c518;">📋 Pegar Configuración Rápida (Opcional)</label>
+        <textarea id="fb-raw-config" class="form-control" rows="3" placeholder="Pegá acá todo el bloque que te da Firebase (const firebaseConfig = { ... }) y se autocompleta solo"></textarea>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+        <div class="form-group">
+          <label class="form-label">API Key</label>
+          <input type="text" id="fb-api-key" class="form-control" placeholder="AIzaSy..." />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Project ID</label>
+          <input type="text" id="fb-project-id" class="form-control" placeholder="mi-torneo-id" />
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+        <div class="form-group">
+          <label class="form-label">Auth Domain</label>
+          <input type="text" id="fb-auth-domain" class="form-control" placeholder="mi-torneo.firebaseapp.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Storage Bucket</label>
+          <input type="text" id="fb-storage-bucket" class="form-control" placeholder="mi-torneo.appspot.com" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">App ID</label>
+        <input type="text" id="fb-app-id" class="form-control" placeholder="1:123456789:web:abcdef..." />
+      </div>
+
+      <div style="margin-top: 1.25rem;">
+        <button class="btn-tv btn-tv-primary" id="btn-save-firebase-config" style="width: 100%; justify-content: center;">
+          🔥 GUARDAR Y CONECTAR EN VIVO
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Footer -->
+  <footer class="main-footer">
+    <div class="container">
+      <p><strong>CUFA'S CUP II</strong> • Transmisión Oficial de FIFA • 20 Equipos</p>
+    </div>
+  </footer>
+
+  <!-- Main JavaScript Bundle (No CORS restriction on file://) -->
+  <script src="js/bundle.js?v=cufas_v12"></script>
+</body>
+</html>
