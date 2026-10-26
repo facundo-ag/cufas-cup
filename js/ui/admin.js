@@ -75,9 +75,7 @@ export function renderAdmin(container) {
         <button class="btn-tv btn-tv-primary" id="btn-seed-f1" title="Carga resultados en todos los 10 partidos de la Fecha 1">
           ⚡ Cargar Fecha 1
         </button>
-        <button class="btn-tv btn-tv-secondary" id="btn-seed-all" title="Simula resultados para las 4 fechas completas (40 partidos)">
-          ⚡ Simular Torneo Completo
-        </button>
+
         <button class="btn-tv btn-tv-danger" id="btn-reset-all" title="Borra todos los goles y deja los partidos por jugar">
           🧹 Limpiar Resultados
         </button>
@@ -544,15 +542,6 @@ function bindAdminEvents(container) {
     });
   }
 
-  // Quick Seed All Tournament
-  const seedAllBtn = container.querySelector('#btn-seed-all');
-  if (seedAllBtn) {
-    seedAllBtn.addEventListener('click', async () => {
-      await store.seedAllTournamentResults();
-      renderAdmin(container);
-      showToast('Torneo completo simulado (40 partidos)', 'success');
-    });
-  }
 
   // Quick Reset All
   const resetAllBtn = container.querySelector('#btn-reset-all');
