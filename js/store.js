@@ -127,9 +127,12 @@ class TournamentStore {
       };
     });
 
-    // Process finished matches
+    // Process finished AND live matches
     matches.forEach(m => {
-      if (m.status === 'finished' && m.homeScore !== null && m.awayScore !== null) {
+      const isCountable = (m.status === 'finished' || m.status === 'live')
+        && m.homeScore !== null && m.awayScore !== null;
+
+      if (isCountable) {
         const home = table[m.homeTeamId];
         const away = table[m.awayTeamId];
 
@@ -146,30 +149,46 @@ class TournamentStore {
             home.pg += 1;
             home.pts += 3;
             away.pp += 1;
-            home.form.push('W');
-            away.form.push('L');
+            // Only push form for finished matches (live result is not final)
+            if (m.status === 'finished') {
+              home.form.push('W');
+              away.form.push('L');
+            }
           } else if (m.homeScore < m.awayScore) {
             away.pg += 1;
             away.pts += 3;
             home.pp += 1;
-            away.form.push('W');
-            home.form.push('L');
+            if (m.status === 'finished') {
+              away.form.push('W');
+              home.form.push('L');
+            }
           } else {
             home.pe += 1;
             away.pe += 1;
             home.pts += 1;
             away.pts += 1;
-            home.form.push('D');
-            away.form.push('D');
+            if (m.status === 'finished') {
+              home.form.push('D');
+              away.form.push('D');
+            }
           }
         }
       }
     });
 
-    // Calculate DG and slice form to last 5
+    // Calculate DG, slice form to last 5, and flag live matches
+    const liveTeamIds = new Set();
+    matches.forEach(m => {
+      if (m.status === 'live') {
+        liveTeamIds.add(m.homeTeamId);
+        liveTeamIds.add(m.awayTeamId);
+      }
+    });
+
     const standingsList = Object.values(table).map(entry => {
       entry.dg = entry.gf - entry.gc;
       entry.form = entry.form.slice(-5);
+      entry.hasLiveMatch = liveTeamIds.has(entry.team.id);
       return entry;
     });
 

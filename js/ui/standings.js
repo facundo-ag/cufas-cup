@@ -71,6 +71,10 @@ export function renderStandings(container) {
       ? entry.form.map(f => `<span class="streak-dot streak-${f.toLowerCase()}">${f}</span>`).join('')
       : `<span style="color: var(--text-dim); font-size: 0.75rem;">-</span>`;
 
+    const liveBadge = entry.hasLiveMatch
+      ? `<span class="standings-live-badge"><span class="live-dot-sm"></span>EN VIVO</span>`
+      : '';
+
     html += `
       <tr class="${zoneClass} ${isMatch ? 'highlighted' : ''} clickable-team-row" 
           data-team-id="${entry.team.id}"
@@ -84,8 +88,11 @@ export function renderStandings(container) {
               ${renderShield(entry.team.shield, entry.team.name)}
             </div>
             <div>
-              <span style="font-weight: 800; color: #fff; text-transform: uppercase;">${escapeHtml(entry.team.player || '')}</span>
-              <span style="color: var(--text-muted); font-size: 0.75rem; margin-left: 0.35rem;">(${escapeHtml(entry.team.name)})</span>
+              <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+                <span style="font-weight: 800; color: #fff; text-transform: uppercase;">${escapeHtml(entry.team.player || '')}</span>
+                ${liveBadge}
+              </div>
+              <span style="color: var(--text-muted); font-size: 0.75rem;">(${escapeHtml(entry.team.name)})</span>
             </div>
           </div>
         </td>
